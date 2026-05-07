@@ -1,0 +1,426 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#C9A84C;--gold-light:#F5EDD6;--dark:#0D0D0D;
+  --card:var(--color-background-primary);--border:var(--color-border-tertiary);
+  --text:var(--color-text-primary);--muted:var(--color-text-secondary);
+  --bg:var(--color-background-secondary);--bg3:var(--color-background-tertiary);
+}
+body{font-family:var(--font-sans)}
+.wrap{padding:1.5rem 0}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:12px}
+.player{display:flex;align-items:center;gap:12px}
+.avatar{width:48px;height:48px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-weight:500;font-size:16px;color:#fff}
+.player-info h2{font-size:16px;font-weight:500;color:var(--text)}
+.player-info p{font-size:12px;color:var(--muted)}
+.level-badge{background:var(--gold);color:#fff;font-size:11px;font-weight:500;padding:4px 12px;border-radius:20px}
+.xp-bar-wrap{display:flex;align-items:center;gap:8px;margin-top:6px}
+.xp-bar{flex:1;height:6px;background:var(--bg);border-radius:3px;overflow:hidden;min-width:120px}
+.xp-fill{height:100%;background:var(--gold);border-radius:3px;transition:width 0.8s ease}
+.xp-label{font-size:11px;color:var(--muted);white-space:nowrap}
+
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:1.5rem}
+.metric{background:var(--bg);border-radius:var(--border-radius-md);padding:1rem;text-align:center}
+.metric-val{font-size:24px;font-weight:500;color:var(--text)}
+.metric-val.gold{color:var(--gold)}
+.metric-lbl{font-size:12px;color:var(--muted);margin-top:2px}
+.metric-delta{font-size:11px;color:#3B6D11;margin-top:4px}
+
+.section-title{font-size:13px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px}
+
+.modules{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-bottom:1.5rem}
+.mod-card{background:var(--card);border:0.5px solid var(--border);border-radius:var(--border-radius-lg);padding:1rem 1.25rem;cursor:pointer;transition:border-color 0.2s}
+.mod-card:hover{border-color:var(--gold)}
+.mod-card.done{border-left:3px solid #639922}
+.mod-card.active{border-left:3px solid var(--gold)}
+.mod-card.locked{opacity:0.5}
+.mod-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.mod-num{font-size:11px;font-weight:500;color:var(--gold)}
+.mod-status{font-size:11px;padding:3px 8px;border-radius:10px;font-weight:500}
+.mod-status.done{background:#EAF3DE;color:#3B6D11}
+.mod-status.active{background:#FAEEDA;color:#854F0B}
+.mod-status.locked{background:var(--bg);color:var(--muted)}
+.mod-title{font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px}
+.mod-desc{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:10px}
+.mod-bar{height:4px;background:var(--bg);border-radius:2px;overflow:hidden}
+.mod-fill{height:100%;border-radius:2px;background:var(--gold);transition:width 1s ease}
+.mod-pts{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:4px}
+
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.5rem}
+@media(max-width:540px){.two-col{grid-template-columns:1fr}}
+
+.panel{background:var(--card);border:0.5px solid var(--border);border-radius:var(--border-radius-lg);padding:1rem 1.25rem}
+.panel-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+
+.mission-item{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border)}
+.mission-item:last-child{border-bottom:none}
+.mission-check{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;margin-top:1px}
+.mission-check.done{background:var(--gold);border-color:var(--gold)}
+.mission-text{font-size:12px;color:var(--text);line-height:1.5}
+.mission-text.done{color:var(--muted);text-decoration:line-through}
+.mission-pts{font-size:11px;color:var(--gold);font-weight:500;margin-left:auto;flex-shrink:0}
+
+.streak-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.streak-day{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500}
+.streak-day.done{background:var(--gold);color:#fff}
+.streak-day.today{background:var(--gold-light);color:#854F0B;border:1.5px solid var(--gold)}
+.streak-day.empty{background:var(--bg);color:var(--muted)}
+.streak-label{font-size:11px;color:var(--muted);margin-top:4px}
+
+.ranking{display:flex;flex-direction:column;gap:6px}
+.rank-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--border-radius-md);background:var(--bg)}
+.rank-item.you{background:var(--gold-light);border:0.5px solid var(--gold)}
+.rank-pos{font-size:13px;font-weight:500;color:var(--muted);width:20px;text-align:center}
+.rank-name{font-size:13px;font-weight:500;color:var(--text);flex:1}
+.rank-score{font-size:12px;color:var(--gold);font-weight:500}
+
+.eval-wrap{margin-bottom:1.5rem}
+.eval-card{background:var(--card);border:0.5px solid var(--border);border-radius:var(--border-radius-lg);padding:1.25rem}
+.eval-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+.eval-score{font-size:36px;font-weight:500;color:var(--gold)}
+.eval-total{font-size:14px;color:var(--muted)}
+.eval-grade{font-size:13px;font-weight:500;padding:4px 12px;border-radius:10px;background:#FAEEDA;color:#854F0B}
+.eval-cats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+@media(max-width:440px){.eval-cats{grid-template-columns:1fr}}
+.eval-cat{display:flex;flex-direction:column;gap:4px}
+.eval-cat-name{font-size:11px;color:var(--muted)}
+.eval-cat-bar{height:6px;background:var(--bg);border-radius:3px;overflow:hidden}
+.eval-cat-fill{height:100%;border-radius:3px;transition:width 1s ease}
+.eval-cat-pts{font-size:11px;font-weight:500;color:var(--text)}
+
+.btn-action{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--border-radius-md);border:0.5px solid var(--border);background:transparent;font-size:13px;color:var(--text);cursor:pointer;transition:all 0.2s;margin-top:10px}
+.btn-action:hover{background:var(--bg)}
+.btn-action.primary{background:var(--gold);border-color:var(--gold);color:#fff}
+.btn-action.primary:hover{opacity:0.9}
+.notif{display:none;position:fixed;bottom:20px;right:20px;background:var(--gold);color:#fff;padding:10px 18px;border-radius:var(--border-radius-md);font-size:13px;font-weight:500;z-index:999;animation:fadeIn 0.3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.tab-row{display:flex;gap:4px;margin-bottom:1rem;border-bottom:0.5px solid var(--border);padding-bottom:0}
+.tab{padding:8px 14px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-0.5px}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.tab-content{display:none}.tab-content.active{display:block}
+.prompt-block{background:var(--bg);border-radius:var(--border-radius-md);padding:12px;margin-bottom:8px}
+.prompt-label{font-size:11px;color:var(--gold);font-weight:500;margin-bottom:6px}
+.prompt-text{font-size:12px;color:var(--text);line-height:1.6;font-family:var(--font-mono)}
+.copy-btn{font-size:11px;color:var(--muted);cursor:pointer;margin-top:6px;display:inline-flex;align-items:center;gap:4px}
+.copy-btn:hover{color:var(--gold)}
+</style>
+
+<div class="wrap">
+<h2 class="sr-only">Dashboard exécutif gamifié pour Country Manager — Joshua Nana</h2>
+
+<div class="topbar">
+  <div class="player">
+    <div class="avatar">JN</div>
+    <div class="player-info">
+      <h2>Joshua Nana</h2>
+      <p>Country Manager · Secteur Minier · Côte d'Ivoire</p>
+      <div class="xp-bar-wrap">
+        <div class="xp-bar"><div class="xp-fill" id="xpFill" style="width:34%"></div></div>
+        <span class="xp-label" id="xpLabel">340 / 1000 XP</span>
+      </div>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+    <span class="level-badge" id="levelBadge">Niveau 2 — Stratège en Formation</span>
+    <span style="font-size:11px;color:var(--muted)">Prochaine évaluation : dans 7 jours</span>
+  </div>
+</div>
+
+<div class="metrics">
+  <div class="metric">
+    <div class="metric-val gold" id="totalScore">12</div>
+    <div class="metric-lbl">Points acquis /50</div>
+    <div class="metric-delta">+0 aujourd'hui</div>
+  </div>
+  <div class="metric">
+    <div class="metric-val" id="moduleDone">0</div>
+    <div class="metric-lbl">Modules validés</div>
+    <div class="metric-delta">7 au total</div>
+  </div>
+  <div class="metric">
+    <div class="metric-val" id="missionDone">0</div>
+    <div class="metric-lbl">Missions complètes</div>
+  </div>
+  <div class="metric">
+    <div class="metric-val" id="streakCount">3</div>
+    <div class="metric-lbl">Jours consécutifs</div>
+    <div class="metric-delta">Série active</div>
+  </div>
+</div>
+
+<div class="tab-row">
+  <div class="tab active" onclick="switchTab('modules')">Modules</div>
+  <div class="tab" onclick="switchTab('missions')">Missions du jour</div>
+  <div class="tab" onclick="switchTab('evaluation')">Évaluation /50</div>
+  <div class="tab" onclick="switchTab('prompts')">Prompts rapides</div>
+</div>
+
+<div id="tab-modules" class="tab-content active">
+  <div class="modules" id="modulesGrid"></div>
+</div>
+
+<div id="tab-missions" class="tab-content">
+  <div class="two-col">
+    <div class="panel">
+      <div class="panel-title"><i class="ti ti-target" aria-hidden="true"></i> Missions quotidiennes</div>
+      <div id="missionList"></div>
+      <div style="margin-top:12px;font-size:12px;color:var(--muted)">Complétez des missions pour gagner des XP et débloquer des modules.</div>
+    </div>
+    <div class="panel">
+      <div class="panel-title"><i class="ti ti-flame" aria-hidden="true"></i> Série de présence</div>
+      <div class="streak-row" id="streakRow"></div>
+      <div class="streak-label">7 derniers jours</div>
+      <div style="margin-top:16px">
+        <div class="panel-title"><i class="ti ti-trophy" aria-hidden="true"></i> Classement interne</div>
+        <div class="ranking">
+          <div class="rank-item"><span class="rank-pos">1</span><span class="rank-name">Top Performer</span><span class="rank-score">48 pts</span></div>
+          <div class="rank-item you"><span class="rank-pos">2</span><span class="rank-name">Joshua Nana <span style="font-size:10px;color:var(--muted)">(vous)</span></span><span class="rank-score" id="rankScore">12 pts</span></div>
+          <div class="rank-item"><span class="rank-pos">3</span><span class="rank-name">Concurrent C</span><span class="rank-score">8 pts</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="tab-evaluation" class="tab-content">
+  <div class="eval-wrap">
+    <div class="eval-card">
+      <div class="eval-top">
+        <div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:4px">Score d'évaluation pratique</div>
+          <div style="display:flex;align-items:baseline;gap:6px">
+            <span class="eval-score" id="evalScore">12</span>
+            <span class="eval-total">/ 50 points</span>
+          </div>
+        </div>
+        <span class="eval-grade" id="evalGrade">En progression</span>
+      </div>
+      <div class="eval-cats" id="evalCats"></div>
+      <button class="btn-action" onclick="sendPrompt('Lance-moi une question d\'évaluation pratique sur le module Négociation & Partenariats pour tester mes 50 points')">
+        <i class="ti ti-player-play" aria-hidden="true"></i> Lancer une question d'évaluation ↗
+      </button>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-title"><i class="ti ti-chart-bar" aria-hidden="true"></i> Progression par module</div>
+    <div style="position:relative;width:100%;height:260px">
+      <canvas id="radarChart" role="img" aria-label="Graphique radar de la progression par module">Progression par module en cours d'évaluation.</canvas>
+    </div>
+  </div>
+</div>
+
+<div id="tab-prompts" class="tab-content">
+  <div class="prompt-block">
+    <div class="prompt-label">PROMPT MATIN — Initialisation de journée</div>
+    <div class="prompt-text" id="p1">Tu es mon conseiller stratégique. Je suis Country Manager secteur minier en Côte d'Ivoire. Aujourd'hui j'ai : [LISTE TÂCHES]. Donne-moi mes 3 priorités absolues, ce que je dois déléguer, et le risque d'agenda que je sous-estime.</div>
+    <span class="copy-btn" onclick="copyPrompt('p1')"><i class="ti ti-copy" aria-hidden="true"></i> Copier</span>
+  </div>
+  <div class="prompt-block">
+    <div class="prompt-label">PROMPT VEILLE — Brief marché hebdomadaire</div>
+    <div class="prompt-text" id="p2">Tu es analyste ressources minières africaines. Synthétise : cours or + actualité réglementaire minière CI + mouvements acteurs secteur + signal géopolitique à surveiller. Format : 4 blocs de 3 lignes. Direct, sans introduction.</div>
+    <span class="copy-btn" onclick="copyPrompt('p2')"><i class="ti ti-copy" aria-hidden="true"></i> Copier</span>
+  </div>
+  <div class="prompt-block">
+    <div class="prompt-label">PROMPT DÉCISION — Analyse sous contrainte de temps</div>
+    <div class="prompt-text" id="p3">J'ai [X heures] pour décider : [DÉCISION]. Je sais : [INFOS]. J'ignore : [INCONNUES]. Risque si erreur : [CONSÉQUENCES]. Dis-moi : certain vs incertain / réversible vs irréversible / coût de l'inaction / ta recommandation en 1 phrase / première action dans 30 min.</div>
+    <span class="copy-btn" onclick="copyPrompt('p3')"><i class="ti ti-copy" aria-hidden="true"></i> Copier</span>
+  </div>
+  <div class="prompt-block">
+    <div class="prompt-label">PROMPT NÉGOCIATION — Préparation complète</div>
+    <div class="prompt-text" id="p4">Coach en négociation. Réunion avec [NOM] sur [OBJET]. Je veux : [OBJECTIF]. Je peux concéder : [MARGES]. Prépare : leur objectif caché / 5 objections + mes réponses / ancrage initial / concessions dans l'ordre / ma ligne rouge / phrase d'ouverture idéale.</div>
+    <span class="copy-btn" onclick="copyPrompt('p4')"><i class="ti ti-copy" aria-hidden="true"></i> Copier</span>
+  </div>
+  <button class="btn-action primary" style="width:100%;justify-content:center" onclick="sendPrompt('Montre-moi tous les prompts de ma bibliothèque Country Manager classés par situation')">
+    <i class="ti ti-library" aria-hidden="true"></i> Accéder à la bibliothèque complète ↗
+  </button>
+</div>
+
+</div>
+
+<div id="notif" class="notif"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const MODULES = [
+  {num:"01",title:"Penser vite & stratégiquement",desc:"Cadres mentaux, vitesse de décision, pensée innovante.",pts:8,max:8,status:"done",progress:100},
+  {num:"02",title:"Veille permanente & arsenal d'outils",desc:"IA, systèmes d'info, emailing stratégique.",pts:6,max:7,status:"active",progress:85},
+  {num:"03",title:"Maximiser l'existant",desc:"Équipe, marchés, processus — extraire plus de ce qu'on a.",pts:0,max:7,status:"locked",progress:0},
+  {num:"04",title:"Organisation & discipline",desc:"Agenda, priorités, rigueur financière, rituels.",pts:0,max:7,status:"locked",progress:0},
+  {num:"05",title:"Délégation & systèmes",desc:"Protocoles, prompts IA, structures autonomes.",pts:0,max:7,status:"locked",progress:0},
+  {num:"06",title:"Formation continue & intelligence",desc:"Les 6 livres comme outils de décision vivants.",pts:0,max:7,status:"locked",progress:0},
+  {num:"07",title:"Maîtrise du rôle & posture",desc:"Crise, institutions, siège/terrain, réputation durable.",pts:0,max:7,status:"locked",progress:0},
+];
+
+const MISSIONS = [
+  {text:"Lire le Module 01 avec calme et lucidité",pts:5,done:false},
+  {text:"Identifier 1 décision récente à analyser avec Rumelt",pts:8,done:false},
+  {text:"Tester le prompt 'Brief marché hebdomadaire'",pts:6,done:false},
+  {text:"Compléter la revue de semaine (vendredi)",pts:5,done:false},
+  {text:"Synthétiser 1 livre en fiche actionnable de 250 mots",pts:8,done:false},
+];
+
+const EVAL_CATS = [
+  {name:"Pensée stratégique",score:8,max:10,color:"#C9A84C"},
+  {name:"Veille & outils",score:4,max:10,color:"#3B6D11"},
+  {name:"Organisation",score:0,max:10,color:"#185FA5"},
+  {name:"Délégation",score:0,max:10,color:"#993556"},
+  {name:"Posture & crise",score:0,max:10,color:"#854F0B"},
+];
+
+let state = {
+  totalScore:12, moduleDone:1, missionDone:0, streak:3,
+  missions: MISSIONS.map(m=>({...m})),
+  modules: MODULES.map(m=>({...m}))
+};
+
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach((t,i)=>{
+    const tabs=['modules','missions','evaluation','prompts'];
+    t.classList.toggle('active', tabs[i]===name);
+  });
+  document.querySelectorAll('.tab-content').forEach(c=>{
+    c.classList.toggle('active', c.id==='tab-'+name);
+  });
+}
+
+function renderModules(){
+  const g=document.getElementById('modulesGrid');
+  g.innerHTML='';
+  state.modules.forEach((m,i)=>{
+    const d=document.createElement('div');
+    d.className='mod-card '+(m.status);
+    d.innerHTML=`<div class="mod-head">
+      <span class="mod-num">MODULE ${m.num}</span>
+      <span class="mod-status ${m.status}">${m.status==='done'?'Validé':m.status==='active'?'En cours':'Verrouillé'}</span>
+    </div>
+    <div class="mod-title">${m.title}</div>
+    <div class="mod-desc">${m.desc}</div>
+    <div class="mod-bar"><div class="mod-fill" style="width:${m.progress}%"></div></div>
+    <div class="mod-pts"><span>${m.pts} pts acquis</span><span>${m.max} pts max</span></div>`;
+    if(m.status==='done'||m.status==='active'){
+      d.onclick=()=>sendPrompt(`Lance-moi une question d'application pratique sur le module ${m.num} : ${m.title}, pour tester ma compréhension terrain.`);
+      d.title='Cliquer pour une question d\'application';
+    }
+    g.appendChild(d);
+  });
+}
+
+function renderMissions(){
+  const l=document.getElementById('missionList');
+  l.innerHTML='';
+  state.missions.forEach((m,i)=>{
+    const d=document.createElement('div');
+    d.className='mission-item';
+    d.innerHTML=`<div class="mission-check ${m.done?'done':''}" onclick="toggleMission(${i})">
+      ${m.done?'<i class="ti ti-check" style="font-size:11px;color:#fff" aria-hidden="true"></i>':''}
+    </div>
+    <div class="mission-text ${m.done?'done':''}">${m.text}</div>
+    <div class="mission-pts">+${m.pts} XP</div>`;
+    l.appendChild(d);
+  });
+}
+
+function toggleMission(i){
+  const m=state.missions[i];
+  if(m.done)return;
+  m.done=true;
+  state.missionDone++;
+  state.totalScore=Math.min(50,state.totalScore+Math.round(m.pts/8));
+  updateMetrics();
+  renderMissions();
+  showNotif(`+${m.pts} XP — Mission accomplie !`);
+}
+
+function renderStreak(){
+  const r=document.getElementById('streakRow');
+  const days=['L','M','M','J','V','S','D'];
+  r.innerHTML=days.map((d,i)=>{
+    const cls=i<state.streak?'done':i===state.streak?'today':'empty';
+    return `<div class="streak-day ${cls}">${d}</div>`;
+  }).join('');
+}
+
+function renderEval(){
+  const c=document.getElementById('evalCats');
+  c.innerHTML=EVAL_CATS.map(e=>`
+    <div class="eval-cat">
+      <span class="eval-cat-name">${e.name}</span>
+      <div class="eval-cat-bar"><div class="eval-cat-fill" style="width:${Math.round(e.score/e.max*100)}%;background:${e.color}"></div></div>
+      <span class="eval-cat-pts">${e.score} / ${e.max} pts</span>
+    </div>`).join('');
+  document.getElementById('evalScore').textContent=state.totalScore;
+  const grade=state.totalScore>=45?'Excellence':state.totalScore>=35?'Confirmé':state.totalScore>=20?'Intermédiaire':'En progression';
+  document.getElementById('evalGrade').textContent=grade;
+}
+
+function renderRadar(){
+  const ctx=document.getElementById('radarChart');
+  if(!ctx)return;
+  new Chart(ctx,{
+    type:'radar',
+    data:{
+      labels:['Pensée\nstratégique','Veille\n& outils','Organisation','Délégation','Posture\n& crise'],
+      datasets:[{
+        label:'Score actuel',
+        data:[8,4,0,0,0],
+        backgroundColor:'rgba(201,168,76,0.15)',
+        borderColor:'#C9A84C',
+        borderWidth:2,
+        pointBackgroundColor:'#C9A84C',
+        pointRadius:4,
+      },{
+        label:'Score cible',
+        data:[10,10,10,10,10],
+        backgroundColor:'rgba(0,0,0,0)',
+        borderColor:'rgba(150,150,150,0.3)',
+        borderWidth:1,
+        borderDash:[4,4],
+        pointRadius:0,
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{r:{
+        min:0,max:10,ticks:{display:false,stepSize:2},
+        grid:{color:'rgba(150,150,150,0.15)'},
+        angleLines:{color:'rgba(150,150,150,0.15)'},
+        pointLabels:{font:{size:11},color:'#8A8A8A'}
+      }}
+    }
+  });
+}
+
+function updateMetrics(){
+  document.getElementById('totalScore').textContent=state.totalScore;
+  document.getElementById('moduleDone').textContent=state.moduleDone;
+  document.getElementById('missionDone').textContent=state.missionDone;
+  document.getElementById('streakCount').textContent=state.streak;
+  document.getElementById('rankScore').textContent=state.totalScore+' pts';
+  const xpPct=Math.min(100,Math.round(state.totalScore/50*100));
+  document.getElementById('xpFill').style.width=xpPct+'%';
+  document.getElementById('xpLabel').textContent=Math.round(xpPct*10)+' / 1000 XP';
+  const lvl=state.totalScore>=45?'Niveau 5 — Stratège Exécutif':state.totalScore>=35?'Niveau 4 — Décideur Confirmé':state.totalScore>=20?'Niveau 3 — Stratège Avancé':state.totalScore>=10?'Niveau 2 — Stratège en Formation':'Niveau 1 — Initiation';
+  document.getElementById('levelBadge').textContent=lvl;
+}
+
+function copyPrompt(id){
+  const el=document.getElementById(id);
+  navigator.clipboard.writeText(el.textContent).then(()=>showNotif('Prompt copié !'));
+}
+
+function showNotif(msg){
+  const n=document.getElementById('notif');
+  n.textContent=msg;
+  n.style.display='block';
+  setTimeout(()=>n.style.display='none',2500);
+}
+
+renderModules();
+renderMissions();
+renderStreak();
+renderEval();
+setTimeout(renderRadar,300);
+updateMetrics();
+</script>
